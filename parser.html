@@ -1,0 +1,201 @@
+<!--
+  Name: Mitchell Hause
+  Date: 1/16/18
+  CSC 4181
+
+-->
+<html>
+    <link rel="stylesheet" href="style.css">
+<head>
+<title>Checker</title>
+<script type="text/javascript">
+
+
+var error_count = 0;
+var charcount = 0;
+
+function check()
+{
+	// Clear the results box to display fresh results
+	clear_results();
+
+  var stack = new Array();
+
+    // Get the input text
+	var text = document.getElementById("text").value;
+
+	// Log the initial expression to the console
+	console.log("before:#"+text+"#");
+
+	// Strip out all whitespace
+	text = text.replace(/\s/g, '');
+
+	// Place space on both sides of special characters
+	text = text.replace(/([+\-*/\(\)])/g, " $1 ")
+
+	// Trim spaces from either end of text
+	text = text.trim();
+
+	// Replace two or more internal spaces with a single space
+	text = text.replace(/\s\s+/g, ' ')
+
+	// Log the cleaned up text to the console
+	console.log("after: #"+text+"#");
+
+	// Return cleaned up expression to text box
+	document.getElementById("text").value = text;
+
+	// Split the text into tokens
+	var tokens = text.split(/\s+/);
+
+
+  var paren_count = 0;
+
+	//(/[^0-9\-\(]/.test(tokens[0]))
+        //  {
+        //      error_message(tokens,1);
+
+         // }
+
+  for(i=0; i<tokens.length; i++)
+	{
+        //do_something_with_token(i,tokens);
+        charcount += tokens[i].length;
+
+      	if(/[^0-9\-\(\)+/*]/.test(tokens[i]))
+          {
+              if(i==1)
+                  {
+                     error_message(tokens,1);
+                  }
+              else if (i==tokens.length - 1){
+                   error_message(tokens,3);
+              }
+              else{
+              error_message(tokens,5);
+              }
+
+          }
+
+          if(/[+\-*/]/.test(tokens[i]) && /[+\*/]/.test(tokens[i+1]))
+          {
+              error_message(tokens,2);
+          }
+
+        else if(/[\(]/.test(tokens[i]))
+        {
+            stack.push(tokens[i]);
+        }
+
+       else if(/[\)]/.test(tokens[i]) && stack!=undefined && stack.length == 0)
+       {
+                    error_message(tokens, 4);
+       }
+
+       else if(/[\)]/.test(tokens[i]))
+       {
+                stack.pop();
+       }
+
+    }
+
+    if(stack!=undefined && stack.length != 0)
+    {
+                    error_message(tokens, 4);
+    }
+
+    if(error_count != 0)
+    {
+        append_result("REJECT\nerrorcount = " + error_count);
+    }
+
+    else
+    {
+        append_result("ACCEPT");
+    }
+}
+
+//define functions
+
+function error_message(tokens,x)
+{
+    error_count ++;
+
+    switch(x)
+    {
+        case 1: append_result("ERROR AT CHAR [0]:  you cannot have " + tokens[0] + " at the beginning.\n");
+                break;
+
+        case 2: append_result("ERROR at CHAR [" + charcount +"]: you cannot have "+ tokens[i+1] + " after " + tokens[i] + "\n");
+                break;
+
+        case 3: append_result("ERROR at CHAR [" + charcount + "]: you cannot have " + tokens[tokens.length-1] + " at the end.\n");
+                break;
+
+        case 4: append_result("ERROR at CHAR [" + charcount + "]: Parenthesis mismatch\n");
+                break;
+
+        case 5: append_result("ERROR at CHAR [" + charcount + "]: Invalid character [" + tokens[i] + "]\n");
+                break;
+
+    }
+}
+
+function tokenName(token)
+{
+	if (isAddOp(token))
+		return "ADDOP";
+	else if (isMulOp(token))
+		return "MULOP";
+	else if (isInteger(token))
+		return "INTEGER:" + token;
+	else
+		return "OTHER:" + token;
+}
+
+function isAddOp(token)
+{
+	return (token == '+' || token == '-');
+}
+
+function isMulOp(token)
+{
+	return (token == '*' || token == '/');
+}
+
+function isInteger(token)
+{
+  return !isNaN(token);
+}
+
+function append_result(token)
+{
+	document.getElementById("results").value += token;
+}
+
+function clear_results()
+{
+	document.resultform.reset();
+    error_count = 0;
+    charcount = 0;
+}
+
+</script>
+</head>
+<body>
+<h1>Simple Expression Parser</h1>
+<p style = "color:#000000">Copy and paste, or type, some text to be checked below and click "Check". </p>
+<form name="checker" action="javascript:check()">
+	<p><textarea rows="9" id="text" name="text" cols="99"></textarea><br>
+	<input type="submit" value="Check" name="">
+	<input type="reset" value="Reset" name="" onclick="javascript:clear_results()"></p>
+</form>
+<h2 style = "color:#000000">Result</h2>
+<form name="resultform">
+	<p><textarea rows="10" id="results" name="results" cols="99" readonly="readonly"></textarea></p>
+</form>
+
+
+<p>&nbsp;</p>
+</body>
+</html>
